@@ -41,7 +41,7 @@ return [
 
     'demo' => env('APP_DEMO', false),
     'env' => env('APP_ENV', 'production'),
-    'google_map_api_key' => env('GOOGLE_MAP_API_KEY', 'bvahlksadblviubdvlavbalsdvyu'),
+    'google_map_api_key' => env('GOOGLE_MAP_API_KEY', null),
 
     /*
     |--------------------------------------------------------------------------

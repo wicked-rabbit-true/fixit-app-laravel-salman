@@ -335,7 +335,13 @@
 
         window.initMap = initMap;
     </script>
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_map_api_key') }}&libraries=places,geometry,drawing&callback=initMap">
-    </script>
+    @if(config('app.google_map_api_key'))
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?v=3.64&key={{ config('app.google_map_api_key') }}&libraries=places,geometry,drawing&callback=initMap">
+        </script>
+    @else
+        <script>
+            console.error('Google Maps API key is missing. Set GOOGLE_MAP_API_KEY in .env.');
+        </script>
+    @endif
 @endpush
