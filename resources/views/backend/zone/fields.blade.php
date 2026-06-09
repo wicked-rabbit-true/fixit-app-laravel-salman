@@ -148,9 +148,6 @@
 </div>
 
 @push('js')
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_map_api_key') }}&libraries=places,geometry,drawing&callback=initMap">
-    </script>
     <script>
         let mapInstance, shapeManager, currentShape = null;
         let existingPolygon = @json(isset($zone->locations) ? $zone->locations : null);
@@ -337,5 +334,8 @@
         }
 
         window.initMap = initMap;
+    </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_map_api_key') }}&libraries=places,geometry,drawing&callback=initMap">
     </script>
 @endpush
