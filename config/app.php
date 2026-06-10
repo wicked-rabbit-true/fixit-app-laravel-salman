@@ -26,7 +26,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Fixit-Laravel'),
+    'name' => env('APP_NAME', 'The Perhour'),
 
     /*
     |--------------------------------------------------------------------------
@@ -41,7 +41,7 @@ return [
 
     'demo' => env('APP_DEMO', false),
     'env' => env('APP_ENV', 'production'),
-    'google_map_api_key' => env('GOOGLE_MAP_API_KEY', null),
+    'google_map_api_key' => env('GOOGLE_MAP_API_KEY', 'bvahlksadblviubdvlavbalsdvyu'),
 
     /*
     |--------------------------------------------------------------------------

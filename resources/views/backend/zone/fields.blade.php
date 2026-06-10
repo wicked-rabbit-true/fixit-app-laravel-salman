@@ -148,200 +148,161 @@
 </div>
 
 @push('js')
-    <script>
-        let mapInstance, shapeManager, currentShape = null;
-        let existingPolygon = @json(isset($zone->locations) ? $zone->locations : null);
-
-        function updatePlacePoints(shape) {
-            if (!shape || !shape.getPath) {
-                return;
-            }
-
-            const vertices = shape.getPath().getArray();
-            const coordinatesArray = vertices.map(vertex => ({
-                lat: vertex.lat(),
-                lng: vertex.lng()
-            }));
-
-            if (coordinatesArray.length > 0 && (coordinatesArray[0].lat !== coordinatesArray[coordinatesArray.length - 1].lat ||
-                    coordinatesArray[0].lng !== coordinatesArray[coordinatesArray.length - 1].lng)) {
-                coordinatesArray.push(coordinatesArray[0]);
-            }
-
-            $('#place_points').val(JSON.stringify(coordinatesArray));
-            $('#coords').text(JSON.stringify(coordinatesArray));
-        }
-
-        function attachShapeListeners(shape) {
-            if (!shape || !shape.getPath) {
-                return;
-            }
-
-            google.maps.event.addListener(shape.getPath(), 'set_at', function() {
-                updatePlacePoints(shape);
-            });
-
-            google.maps.event.addListener(shape.getPath(), 'insert_at', function() {
-                updatePlacePoints(shape);
-            });
-
-            google.maps.event.addListener(shape.getPath(), 'remove_at', function() {
-                updatePlacePoints(shape);
-            });
-        }
-
-        function handleOverlayComplete(event) {
-            if (currentShape) {
-                currentShape.setMap(null);
-            }
-            currentShape = event.overlay;
-            currentShape.type = event.type;
-            currentShape.setEditable(true);
-            attachShapeListeners(currentShape);
-            updatePlacePoints(currentShape);
-            shapeManager.setDrawingMode(null);
-        }
-
-        function getPolygonBounds(polygon) {
-            const bounds = new google.maps.LatLngBounds();
-            polygon.getPath().forEach(function(vertex) {
-                bounds.extend(vertex);
-            });
-            return bounds;
-        }
-
-        function setupMap() {
-            const startLocation = {
-                lat: 21.20764938296402,
-                lng: 72.77381805168456
-            };
-            const mapOptions = {
-                zoom: 13,
-                center: startLocation,
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            };
-            mapInstance = new google.maps.Map($('#map-container')[0], mapOptions);
-        }
-
-        function setupDrawingManager() {
-            shapeManager = new google.maps.drawing.DrawingManager({
-                drawingMode: google.maps.drawing.OverlayType.POLYGON,
-                drawingControl: true,
-                drawingControlOptions: {
-                    position: google.maps.ControlPosition.TOP_CENTER,
-                    drawingModes: [google.maps.drawing.OverlayType.POLYGON]
-                },
-                polygonOptions: {
-                    editable: true
-                }
-            });
-            shapeManager.setMap(mapInstance);
-            google.maps.event.addListener(shapeManager, 'overlaycomplete', handleOverlayComplete);
-        }
-
-        function centerMapOnUser(position) {
-            const userLocation = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
-            mapInstance.setCenter(userLocation);
-        }
-
-        function setupGeolocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(centerMapOnUser);
-            }
-        }
-
-        function loadExistingPolygon() {
-            if (existingPolygon) {
-                const coordinates = existingPolygon.map(coord => new google.maps.LatLng(coord.lat, coord.lng));
-                currentShape = new google.maps.Polygon({
-                    paths: coordinates,
-                    editable: true,
-                    map: mapInstance
-                });
-                attachShapeListeners(currentShape);
-                updatePlacePoints(currentShape);
-                mapInstance.fitBounds(getPolygonBounds(currentShape));
-            }
-        }
-
-        function searchBox() {
-            const input = document.getElementById('search-box');
-            if (!input) {
-                return;
-            }
-
-            const searchBox = new google.maps.places.SearchBox(input);
-
-            mapInstance.addListener('bounds_changed', function() {
-                searchBox.setBounds(mapInstance.getBounds());
-            });
-
-            searchBox.addListener('places_changed', function() {
-                const places = searchBox.getPlaces();
-                if (places.length === 0) {
-                    return;
-                }
-
-                const bounds = new google.maps.LatLngBounds();
-                places.forEach(function(place) {
-                    if (!place.geometry) {
-                        return;
-                    }
-
-                    if (place.geometry.viewport) {
-                        bounds.union(place.geometry.viewport);
-                    } else {
-                        bounds.extend(place.geometry.location);
-                    }
-                });
-
-                mapInstance.fitBounds(bounds);
-            });
-        }
-
-        function initFormValidation() {
-            $("#zoneForm").validate({
-                ignore: [],
-                rules: {
-                    "name": "required",
-                    "place_points": "required",
-                }
-            });
-
-            $('#submitBtn').click(function(e) {
-                e.preventDefault();
-
-                if ($("#zoneForm").valid()) {
-                    $("#zoneForm").submit();
-                }
-            });
-        }
-
-        function initMap() {
-            if (!document.getElementById('map-container')) {
-                return;
-            }
-
-            setupMap();
-            setupDrawingManager();
-            setupGeolocation();
-            loadExistingPolygon();
-            searchBox();
-            initFormValidation();
-        }
-
-        window.initMap = initMap;
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key={{ config('app.google_map_api_key') }}&libraries=places,geometry,drawing&callback=initMap">
     </script>
-    @if(config('app.google_map_api_key'))
-        <script async defer
-            src="https://maps.googleapis.com/maps/api/js?v=3.64&key={{ config('app.google_map_api_key') }}&libraries=places,geometry,drawing&callback=initMap">
-        </script>
-    @else
-        <script>
-            console.error('Google Maps API key is missing. Set GOOGLE_MAP_API_KEY in .env.');
-        </script>
-    @endif
+    <script>
+        (function($) {
+            "use strict";
+            $(document).ready(function() {
+                $("#zoneForm").validate({
+                    ignore: [],
+                    rules: {
+                        "name": "required",
+                        "place_points": "required",
+                    }
+                });
+                
+                $('#submitBtn').click(function(e) {
+                    e.preventDefault();
+
+                    if ($("#zoneForm").valid()) {
+                        $("#zoneForm").submit();
+                    }
+                });
+
+                let mapInstance, shapeManager, currentShape = null;
+                let existingPolygon = @json(isset($zone->locations) ? $zone->locations : null);
+
+                function initMap() {
+                    setupMap();
+                    setupDrawingManager();
+                    setupGeolocation();
+                    loadExistingPolygon();
+                    searchBox();
+                }
+
+                function setupMap() {
+                    const startLocation = {
+                        lat: 21.20764938296402,
+                        lng: 72.77381805168456
+                    };
+                    const mapOptions = {
+                        zoom: 13,
+                        center: startLocation,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+                    mapInstance = new google.maps.Map($('#map-container')[0], mapOptions);
+                }
+
+                function setupDrawingManager() {
+                    shapeManager = new google.maps.drawing.DrawingManager({
+                        drawingMode: google.maps.drawing.OverlayType.POLYGON,
+                        drawingControl: true,
+                        drawingControlOptions: {
+                            position: google.maps.ControlPosition.TOP_CENTER,
+                            drawingModes: [google.maps.drawing.OverlayType.POLYGON]
+                        },
+                        polygonOptions: {
+                            editable: true
+                        }
+                    });
+                    shapeManager.setMap(mapInstance);
+                    google.maps.event.addListener(shapeManager, "overlaycomplete", handleOverlayComplete);
+                }
+
+                function setupGeolocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(centerMapOnUser);
+                    }
+                }
+
+                function centerMapOnUser(position) {
+                    const userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    mapInstance.setCenter(userLocation);
+                }
+
+                function handleOverlayComplete(event) {
+                    if (currentShape) {
+                        currentShape.setMap(null);
+                    }
+                    currentShape = event.overlay;
+                    currentShape.type = event.type;
+                    const vertices = currentShape.getPath().getArray();
+                    const coordinatesArray = vertices.map(vertex => {
+                        return {
+                            lat: vertex.lat(),
+                            lng: vertex.lng()
+                        };
+                    });
+
+                    // Ensure the polygon is closed
+                    if (coordinatesArray[0].lat !== coordinatesArray[coordinatesArray.length - 1].lat ||
+                        coordinatesArray[0].lng !== coordinatesArray[coordinatesArray.length - 1].lng) {
+                        coordinatesArray.push(coordinatesArray[0]);
+                    }
+
+                    $('#place_points').val(JSON.stringify(coordinatesArray));
+                }
+
+                function loadExistingPolygon() {
+                    if (existingPolygon) {
+                        const coordinates = existingPolygon.map(coord => new google.maps.LatLng(coord.lat, coord
+                            .lng));
+                        currentShape = new google.maps.Polygon({
+                            paths: coordinates,
+                            editable: true,
+                            map: mapInstance
+                        });
+                        mapInstance.fitBounds(getPolygonBounds(currentShape));
+                    }
+                }
+
+                function getPolygonBounds(polygon) {
+                    const bounds = new google.maps.LatLngBounds();
+                    polygon.getPath().forEach(function(vertex) {
+                        bounds.extend(vertex);
+                    });
+                    return bounds;
+                }
+
+                function searchBox() {
+                    var input = document.getElementById('search-box');
+                    var searchBox = new google.maps.places.SearchBox(input);
+
+                    mapInstance.addListener('bounds_changed', function() {
+                        searchBox.setBounds(mapInstance.getBounds());
+                    });
+
+                    searchBox.addListener('places_changed', function() {
+                        var places = searchBox.getPlaces();
+                        if (places.length == 0) {
+                            return;
+                        }
+
+                        var bounds = new google.maps.LatLngBounds();
+                        places.forEach(function(place) {
+                            if (!place.geometry) {
+                                return;
+                            }
+
+                            if (place.geometry.viewport) {
+                                bounds.union(place.geometry.viewport);
+                            } else {
+                                bounds.extend(place.geometry.location);
+                            }
+                        });
+
+                        mapInstance.fitBounds(bounds);
+                    });
+                }
+
+                // Initialize map
+                initMap();
+            });
+        })(jQuery);
+    </script>
 @endpush

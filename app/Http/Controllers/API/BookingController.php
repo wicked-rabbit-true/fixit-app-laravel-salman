@@ -16,6 +16,7 @@ use App\Http\Resources\BookingResource;
 use App\Models\Booking;
 use App\Models\BookingStatus;
 use App\Repositories\API\BookingRepository;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
@@ -71,6 +72,13 @@ class BookingController extends Controller
             });
         }
 
+        if ($request->filled('category_ids')) {
+            $categoryIds = is_array($request->category_ids) ? $request->category_ids : explode(',', $request->category_ids);
+            $bookings->whereHas('service.categories', function ($query) use ($categoryIds) {
+                $query->whereIn('categories.id', $categoryIds);
+            });
+        }
+
         if ($request->filled('booking_status')) {
             $statusId = BookingStatus::where('slug', $request->booking_status)->value('id');
             if ($statusId) {
@@ -79,7 +87,10 @@ class BookingController extends Controller
         }
 
         if ($request->filled('start_date') && $request->filled('end_date')) {
-            $bookings->whereBetween('created_at', [$request->start_date, $request->end_date]);
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+            $bookings->whereNotNull('date_time')
+                ->whereBetween('date_time', [$startDate, $endDate]);
         }
 
         if ($request->filled('time_filter')) {
