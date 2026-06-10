@@ -1,54 +1,39 @@
-# Root-level gitignore for fixit-app-salman
-
-# macOS
-.DS_Store
-
+/vendor/
+/node_modules/
+/.env
+/.env.*
+!/.env.example
+/storage/
+/public/storage
+/public/build/
+/public/hot
+/bootstrap/cache/*.php
+/.phpunit.result.cache
+/phpunit.xml
+/phpunit.xml.dist
+# IDE
+/.vscode/
+/.idea/
+/*.iml
+/*.sublime-project
+/*.sublime-workspace
+/.phpstorm.meta.php
+# Laravel IDE helper
+/_ide_helper.php
+/_ide_helper_models.php
+# Laravel Swoole / Horizon
+/horizon.sqlite
+/horizon.log
+# OS
+/.DS_Store
+/Thumbs.db
+/ehthumbs.db
+/Desktop.ini
 # Logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS generated files
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# IDEs and editors
-.vscode/
-.idea/
-*.iml
-*.sublime-project
-*.sublime-workspace
-
-# Laravel
-vendor/
-node_modules/
-.env
-.env.*
-.phpunit.result.cache
-phpunit.xml
-phpunit.xml.dist
-storage/
-bootstrap/cache/*.php
-public/storage
-.phpstorm.meta.php
-.idea/
-
-# Laravel IDE helper
-_ide_helper.php
-_ide_helper_models.php
-
-# Laravel Swoole / Horizon
-horizon.sqlite
-horizon.log
-
-# Node/NPM
-node_modules/
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
+# NPM / Yarn
+/package-lock.json
+/yarn.lock
+/pnpm-lock.yaml
+# macOS
+.DS_Store
