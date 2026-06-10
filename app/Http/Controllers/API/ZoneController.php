@@ -124,16 +124,6 @@ class ZoneController extends Controller
                     'data' => $zones,
                 ];
             }
-            // If no zone matched by polygon OR caller requests to allow all regions,
-            // optionally return all active zones as a fallback so clients can operate
-            // in countries/regions where no polygonal zones are defined.
-            if ($request->has('allow_all_regions') && (bool) $request->allow_all_regions) {
-                $all = Zone::where('status', true)->get(['id', 'name', 'currency_id']);
-                return [
-                    'success' => true,
-                    'data' => $all,
-                ];
-            }
         }
 
         return [
