@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             SeoSettingSeeder::class,
             PerhourBrandingSeeder::class,
             PerhourCategorySeeder::class,
+            PerhourZoneSeeder::class,
         ]);
     }
 }
