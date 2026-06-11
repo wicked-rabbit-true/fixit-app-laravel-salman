@@ -82,9 +82,7 @@
           url: "{{ url('check-zone') }}",
           method: 'GET',
           success: function(data) {
-              if (data.zonesExist && !data.zoneSet && !data.locationSet) {
-                 toastr.error("{{ __('frontend::static.location_error_message') }}");
-              } else if (data.locationSet || data.zoneSet) {
+              if (data.locationSet || data.zoneSet) {
                   $('#overlay').hide();
                   $('#locationBox').removeClass('show');
                   if (data.location?.length > 1) {

@@ -1850,16 +1850,12 @@ class Helpers
         $zoneIds = session('zoneIds', []);
         $query = Service::query();
 
-        // Always apply zone filter
-        if (count($zoneIds)) {
+        if (!empty($zoneIds)) {
             $query->whereHas('categories', function ($categories) use ($zoneIds) {
                 $categories->whereHas('zones', function ($zones) use ($zoneIds) {
                     $zones->whereIn('zones.id', $zoneIds);
                 });
             });
-        } else {
-            // If no zone is selected, return empty collection
-            return collect();
         }
 
         // Apply service ID filter if provided
