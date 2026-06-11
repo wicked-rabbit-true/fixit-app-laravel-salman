@@ -6,7 +6,6 @@ use App\Enums\CategoryType;
 use App\Models\Category;
 use App\Models\HomePage;
 use App\Models\User;
-use App\Models\Zone;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -18,7 +17,6 @@ class PerhourCategorySeeder extends Seeder
     public function run(): void
     {
         $adminId = User::role('admin')->value('id') ?? User::query()->value('id') ?? 1;
-        $zoneIds = Zone::where('status', true)->pluck('id')->all();
         $categoryIds = [];
 
         $titles = [
@@ -57,10 +55,6 @@ class PerhourCategorySeeder extends Seeder
             $category->setTranslation('title', 'en', $title);
             $category->setTranslation('description', 'en', "Hourly {$title} services");
             $category->save();
-
-            if (! empty($zoneIds)) {
-                $category->zones()->syncWithoutDetaching($zoneIds);
-            }
 
             $categoryIds[] = $category->id;
         }
