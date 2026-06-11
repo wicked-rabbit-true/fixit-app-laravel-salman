@@ -1165,6 +1165,7 @@ return [
         'on_the_way' => 'On The Way',
         'completed' => 'Completed',
         'schedule' => 'Schedule',
+        'calendar' => 'Calendar',
         'cancel' => 'Cancel',
         'on_hold' => 'On Hold',
         'action' => 'Action',
